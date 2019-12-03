@@ -5,6 +5,71 @@ using Queue;
 namespace PriorityQueue {
 	
 	public class PriorityQueue<T> : IQueue<T> where T : IComparable<T> {
+		
+		static void Main(string[] args) {
+
+            PriorityQueue<int> pq = new PriorityQueue<int>();
+
+			pq.Add(5);
+            Console.WriteLine("Enqueued " + 5);
+			Console.WriteLine(pq);
+			pq.Add(9);
+            Console.WriteLine("Enqueued " + 9);
+			Console.WriteLine(pq);
+			pq.Add(1);
+            Console.WriteLine("Enqueued " + 1);
+			Console.WriteLine(pq);
+			pq.Add(3);
+            Console.WriteLine("Enqueued " + 3);
+			Console.WriteLine(pq);
+			pq.Add(6);
+            Console.WriteLine("Enqueued " + 6);
+			Console.WriteLine(pq);
+			pq.Add(14);
+            Console.WriteLine("Enqueued " + 14);
+			Console.WriteLine(pq);
+			pq.Add(2);
+            Console.WriteLine("Enqueued " + 2);
+			Console.WriteLine(pq);
+			pq.Add(7);
+            Console.WriteLine("Enqueued " + 7);
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+			pq.Add(4);
+            Console.WriteLine("Enqueued " + 4);
+			Console.WriteLine(pq);
+			pq.Add(9);
+            Console.WriteLine("Enqueued " + 9);
+			Console.WriteLine(pq);
+			pq.Add(8);
+            Console.WriteLine("Enqueued " + 8);
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
+			Console.WriteLine(pq);
+			pq.Add(20);
+            Console.WriteLine("Enqueued " + 20);
+			Console.WriteLine(pq);
+
+        }
 
 		private List<T> _elements;
 		private int _count;
@@ -126,36 +191,8 @@ namespace PriorityQueue {
 				_elements[parentIndex] = child;
 				_elements[childIndex] = parent;
 
-				// call sideheap to check if the children nodes of the new parent shall be switched
-				Sideheap(childIndex % 2 == 1 ? childIndex - 1 : childIndex);
-
 				// now upheap at the parent's position
 				Upheap(parentIndex);
-
-			}
-			
-			Sideheap(childIndex % 2 == 1 ? childIndex - 1 : childIndex);
-
-		}
-
-		private void Sideheap(int leftIndex){
-
-			int rightIndex = leftIndex + 1;	// rightIndex is always leftIndex + 1
-
-			// if the rightIndex does not exist, do not proceed
-			if(rightIndex > _count)
-				return;
-
-			// get elements
-			T left = _elements[leftIndex];
-			T right = _elements[rightIndex];
-
-			// if left is less than right, swap
-			if(CompareElements(left, right) < 0){
-
-				//Console.WriteLine("Swapped " + right + " and " + left);
-				_elements[leftIndex] = right;
-				_elements[rightIndex] = left;
 
 			}
 
@@ -187,21 +224,16 @@ namespace PriorityQueue {
 			// if parent is less than either of its children
 			if(CompareElements(parent, left) < 0 || CompareElements(parent, right) < 0){
 
-				// if left does not exist, this should NOT happen
-				if(leftOOB){
-					Console.WriteLine("Left element SHOULD EXIST");
-					return;
-				}
+				//find largest child
+				int largestIndex = CompareElements(left, right) > 0 ? leftIndex : rightIndex;
+				T select = _elements[largestIndex];
 
-				// swap parent and left child
-				//Console.WriteLine("Swapped " + parent + " and " + left);
-				_elements[parentIndex] = left;
-				_elements[leftIndex] = parent;
+				// swap parent and largest child
+				_elements[parentIndex] = select;
+				_elements[largestIndex] = parent;
 				Downheap(leftIndex);
 
 			}
-			
-			Sideheap(leftIndex);
 
 		}
 
