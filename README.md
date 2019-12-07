@@ -10,6 +10,15 @@ PriorityQueue<T> is an implementation of the priority queue structure that uses 
 using PriorityQueue;
 ```
 
+The priority queue may be instantiated with a capacity and whether to reverse the order of the elements.
+
+```c#
+PriorityQueue<string> pq = new PriorityQueue<>();	// default capacity of 100
+PriorityQueue<string> pq = new PriorityQueue<>(true);	// default capacity of 100, reverse order
+PriorityQueue<string> pq = new PriorityQueue<>(200);	// instantiated with capacity of 200
+PriorityQueue<string> pq = new PriorityQueue<>(200, true);	// instantiated with capacity of 200, reverse order
+```
+
 The following functionality is included:
 
 ```c#
