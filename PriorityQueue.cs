@@ -5,71 +5,6 @@ using Queue;
 namespace PriorityQueue {
 	
 	public class PriorityQueue<T> : IQueue<T> where T : IComparable<T> {
-		
-		static void Main(string[] args) {
-
-            PriorityQueue<int> pq = new PriorityQueue<int>();
-
-			pq.Add(5);
-            Console.WriteLine("Enqueued " + 5);
-			Console.WriteLine(pq);
-			pq.Add(9);
-            Console.WriteLine("Enqueued " + 9);
-			Console.WriteLine(pq);
-			pq.Add(1);
-            Console.WriteLine("Enqueued " + 1);
-			Console.WriteLine(pq);
-			pq.Add(3);
-            Console.WriteLine("Enqueued " + 3);
-			Console.WriteLine(pq);
-			pq.Add(6);
-            Console.WriteLine("Enqueued " + 6);
-			Console.WriteLine(pq);
-			pq.Add(14);
-            Console.WriteLine("Enqueued " + 14);
-			Console.WriteLine(pq);
-			pq.Add(2);
-            Console.WriteLine("Enqueued " + 2);
-			Console.WriteLine(pq);
-			pq.Add(7);
-            Console.WriteLine("Enqueued " + 7);
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-			pq.Add(4);
-            Console.WriteLine("Enqueued " + 4);
-			Console.WriteLine(pq);
-			pq.Add(9);
-            Console.WriteLine("Enqueued " + 9);
-			Console.WriteLine(pq);
-			pq.Add(8);
-            Console.WriteLine("Enqueued " + 8);
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-            Console.WriteLine(pq.Poll() + " polled from the top of the queue");
-			Console.WriteLine(pq);
-			pq.Add(20);
-            Console.WriteLine("Enqueued " + 20);
-			Console.WriteLine(pq);
-
-        }
 
 		private List<T> _elements;
 		private int _count;
@@ -110,27 +45,45 @@ namespace PriorityQueue {
 
 			T head = _elements[1];	//get the topmost element
 			
-			// if there is just 1 element in the queue, return the head and remove it from the queue
-			if(_count == 1){
-				_elements.RemoveAt(1);
-				_elements.RemoveAt(0);	// also remove the stand-in element
-				_count--;	// there's one less element in the queue
-				return head;
-			}
+			RemoveAt(1);
 
-			// otherwise, swap with the bottommost element and downheap from the top
-			T last = _elements[_count];
-			_elements.RemoveAt(_count);
-			_count--;	// there's one less element in the queue
-			_elements[1] = last;
-			Downheap(1);
 			return head;
 
 		}
 
 		public void Remove(T element){
 
+			// find index of the element to be removed
+			int index = FindIndex(element);
 
+			// if element not found, don't proceed
+			if(index == -1)
+				return;
+
+			// remove the element at the index
+			RemoveAt(index);
+
+		}
+
+		// private function to assist Remove(T element) function
+		private void RemoveAt(int index){
+
+			T element = _elements[index];	//get the topmost element
+			
+			// if there is just 1 element in the queue, return the head and remove it from the queue
+			if(_count == 1){
+				_elements.RemoveAt(1);
+				_elements.RemoveAt(0);	// also remove the stand-in element
+				_count--;	// there's one less element in the queue
+				return;
+			}
+
+			// otherwise, swap with the bottommost element and downheap from the top
+			T last = _elements[_count];
+			_elements.RemoveAt(_count);
+			_count--;	// there's one less element in the queue
+			_elements[index] = last;
+			Downheap(index);
 
 		}
 
@@ -234,6 +187,16 @@ namespace PriorityQueue {
 				Downheap(leftIndex);
 
 			}
+
+		}
+
+		private int FindIndex(T element){
+
+			for(int i = 1; i <= _count; i++)
+				if(_elements[i].Equals(element))
+					return i;
+			
+			return -1;
 
 		}
 
