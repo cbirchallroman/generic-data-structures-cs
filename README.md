@@ -14,6 +14,6 @@ The following functionality is included:
 
 ```c#
 void Add(T element);	// adds element to the priority queue
-T Poll();				// removes element from the top of the priority queue
-T Peek();				// returns the element from the top of the priority queue without removing
+T Poll();	// element from the top of the priority queue
+T Peek();	// returns the element from the top of the priority queue without removing
 ```
