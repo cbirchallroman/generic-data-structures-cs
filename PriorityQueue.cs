@@ -181,12 +181,16 @@ namespace PriorityQueue {
 			// if parent is less than either of its children
 			if(CompareElements(parent, left) < 0 || CompareElements(parent, right) < 0){
 
-				//find largest child
+				// find largest child
 				int largestIndex = -1;
-				if(!leftOOB && !rightOOB)
+				if(!leftOOB && !rightOOB)	// if there are elements to the left and right, choose the largest of the two
 					largestIndex = CompareElements(left, right) > 0 ? leftIndex : rightIndex;
-				else if(!leftOOB)
+				else if(!leftOOB && CompareElements(parent, left) < 0)	// if there is only an element to the left, make sure also that it is larger priority than the parent
 					largestIndex = leftIndex;
+
+				// if not found, don't proceed
+				if(largestIndex == -1)
+					return;
 				
 				T select = _elements[largestIndex];
 
