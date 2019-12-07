@@ -69,6 +69,16 @@ namespace PriorityQueue {
 
 		}
 
+		public void Update(T element){
+
+			// remove element if it exists
+			Remove(element);
+
+			//add it back to the queue
+			Enqueue(element);
+
+		}
+
 		// private function to assist Remove(T element) function
 		private void RemoveAt(int index){
 
