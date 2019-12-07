@@ -4,7 +4,7 @@ using Queue;
 
 namespace PriorityQueue {
 	
-	public class PriorityQueue<T> : IQueue<T> where T : IComparable<T> {
+	public class PriorityQueue<T> : Queue<T> where T : IComparable<T> {
 
 		private List<T> _elements;
 		private int _count;
@@ -23,7 +23,7 @@ namespace PriorityQueue {
 
 		}
 
-		public void Add(T element){
+		public void Enqueue(T element){
 
 			// if contents are empty, add element to the front so that the index is taken
 			if(_count == 0)
@@ -38,7 +38,7 @@ namespace PriorityQueue {
 
 		}
 
-		public T Poll(){
+		public T Dequeue(){
 
 			if(_count == 0)
 				return default(T);

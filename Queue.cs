@@ -2,9 +2,9 @@ namespace Queue {
 
 	public interface IQueue<T> {
 
-		void Add(T element);
+		void Enqueue(T element);
 		void Remove(T element);
-		T Poll();
+		T Dequeue();
 		T Peek();
 		int Count { get; }
 
