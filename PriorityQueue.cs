@@ -4,20 +4,24 @@ using Queue;
 
 namespace PriorityQueue {
 	
-	public class PriorityQueue<T> : Queue<T> where T : IComparable<T> {
+	public class PriorityQueue<T> : IQueue<T> where T : IComparable<T> {
 
 		private List<T> _elements;
 		private int _count;
 		private bool _reverse;
 
+		private const int DefaultCapacity = 100;
+
 		public int Count { get { return _count; } }
 
 		// by default, the comparer is not used in reverse
-		public PriorityQueue() : this(false) { }
+		public PriorityQueue() : this(DefaultCapacity, false) { }
+		public PriorityQueue(int capacity) : this(capacity, false) { }
+		public PriorityQueue(bool reverse) : this(DefaultCapacity, reverse) { }
 
-		public PriorityQueue(bool reverse){
+		public PriorityQueue(int capacity, bool reverse){
 
-        	_elements = new List<T>();
+        	_elements = new List<T>(capacity);
 			_reverse = reverse;
 			_count = 0;
 
@@ -178,7 +182,12 @@ namespace PriorityQueue {
 			if(CompareElements(parent, left) < 0 || CompareElements(parent, right) < 0){
 
 				//find largest child
-				int largestIndex = CompareElements(left, right) > 0 ? leftIndex : rightIndex;
+				int largestIndex = -1;
+				if(!leftOOB && !rightOOB)
+					largestIndex = CompareElements(left, right) > 0 ? leftIndex : rightIndex;
+				else if(!leftOOB)
+					largestIndex = leftIndex;
+				
 				T select = _elements[largestIndex];
 
 				// swap parent and largest child
