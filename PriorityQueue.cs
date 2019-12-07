@@ -188,6 +188,10 @@ namespace PriorityQueue {
 				else if(!leftOOB && CompareElements(parent, left) < 0)	// if there is only an element to the left, make sure also that it is larger priority than the parent
 					largestIndex = leftIndex;
 
+				// this is because default(int) is 0, so it will not be considered null and is still being compared
+				//		despite not existing, so we need to make sure that there actually is a 0 there
+				//		and we're not just comparing the parent to a non-existent element
+
 				// if not found, don't proceed
 				if(largestIndex == -1)
 					return;
