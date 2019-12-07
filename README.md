@@ -13,7 +13,8 @@ using PriorityQueue;
 The following functionality is included:
 
 ```c#
-void Add(T element);	// adds element to the priority queue
-T Poll();	// element from the top of the priority queue
+void Enqueue(T element);	// adds element to the priority queue
+void Remove(T element);	// removes element from the priority queue
+T Dequeue();	// element from the top of the priority queue
 T Peek();	// returns the element from the top of the priority queue without removing
 ```
