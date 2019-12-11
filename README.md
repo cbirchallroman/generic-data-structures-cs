@@ -27,4 +27,5 @@ void Remove(T element);	// removes element from the priority queue
 void Update(T element);	// updates element's priority within the queue
 T Dequeue();	// element from the top of the priority queue
 T Peek();	// returns the element from the top of the priority queue without removing
+bool Contains(T element);	// returns true if queue contains given element
 ```
