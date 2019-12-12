@@ -35,7 +35,7 @@ bool Contains(T element);	// returns true if queue contains given element
 The namespace *AStarPathfinding* contains tools to implement the A* pathfinding algorithm.
 
 ```c#
-using PriorityQueue;
+using AStarPathfinding;
 ```
 
 First, extend the abstract class Node. The class is self-referential and extends the IComparable interface, so the header of the subclass will look like this:
