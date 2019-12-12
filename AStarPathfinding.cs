@@ -44,7 +44,7 @@ namespace AStarPathfinding {
 			Dictionary<int, bool> visited = new Dictionary<int, bool>();
 
 			// we are doing the algorithm in reverse
-			//	that way the user may search for paths to multiple exits
+			//	that way the user may search for paths to multiple exit points from one starting position
 			N goal = start;
 			foreach(N n in ends){
 

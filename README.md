@@ -55,3 +55,20 @@ public abstract List<N> GetNeighbors();	// get accessible nodes adjacent to this
 public override abstract int GetHashCode();	// get hashcode of node subclass
 ```
 
+Create a Pathfinder object that refers to the subclass of Node that you implemented, and supply it with the dimensions of your world (or the surface/body of space being considered).
+
+```c#
+int[] dimensions = new int{100, 100};
+Pathfinder<TestNode> pathfinder = new Pathfinder<>(dimensions);
+```
+
+Finally, call FindPath(N, List<N>) which takes one starting position and any number of exit points. The function returns a queue of nodes.
+
+```c#
+// assume that nodes 'start' and 'end' of type TestNode have been instantiated
+List<TestNode> ends = new List<TestNode>();
+ends.Add(end);
+
+// call pathfinder
+Queue<TestNode> path = pf.FindPath(start, ends);
+```
