@@ -13,9 +13,7 @@ namespace Pathfinding2D {
 		private const float SQRT2 = 1.4f;
 		private PathConditions _conditions;
 
-		public Node2D(int x, int y, PathConditions conditions) : this(x, y, conditions, null){ }
-
-		public Node2D(int x, int y, PathConditions conditions, Node2D parent) : base(parent){
+		public Node2D(int x, int y, PathConditions conditions){
 
 			X = x;
 			Y = y;
@@ -49,9 +47,14 @@ namespace Pathfinding2D {
 			// difference between coordinates
 			int dx = Math.Abs(X - to.X), dy = Math.Abs(Y - to.Y);
 
-			// return highest difference between coordinates
-			//	if neighbor is diagonal to current, add sqrt(2)
-			return (float)Math.Sqrt(dx * dx + dy * dy);
+			bool diagonalAllowed = _conditions.DiagonalAllowed;
+
+			// octile distance if diagonal movement allowed
+			if(_conditions.DiagonalAllowed)
+				return (dx + dy) + (SQRT2 - 2) * (Math.Min(dx, dy));
+
+			// manhattan distance: simply add differences along both axes
+			return dx + dy;
 
 		}
 
@@ -69,7 +72,8 @@ namespace Pathfinding2D {
 						continue;
 
 					// create node
-					Node2D neighbor = new Node2D(X + dx, Y + dy, _conditions, this);
+					Node2D neighbor = new Node2D(X + dx, Y + dy, _conditions);
+					neighbor.SetParent(this);
 					
 					// if this node can be traveled to, add it to the list
 					//	KEEP IN MIND THAT THE ALGORITHM SEARCHES FROM FINISH TO START POSITION
@@ -89,7 +93,9 @@ namespace Pathfinding2D {
 		// returns cost of traveling from this node to its neighbor
 		public override float GetTravelCost(Node2D to){
 
-			return _conditions.GetTravelCost(to) + (IsDiagonal(to) ? SQRT2 : 0);	// simply refer to _conditions, and include diagonal
+			float cost = _conditions.GetTravelCost(to);	// simply get from _conditions
+			cost *= IsDiagonal(to) ? SQRT2 : 1;	// multiply by 1.4 if diagonal
+			return cost;
 
 		}
 
@@ -115,14 +121,14 @@ namespace Pathfinding2D {
 		private int[,] _world;
 		public int SzX { get; private set; }
 		public int SzY { get; private set; }
-		private bool _diagonalAllowed;
+		public bool DiagonalAllowed { get; private set; }
 
 		public PathConditions(int[,] world, int szx, int szy, bool diagonalAllowed) {
 
 			_world = world;
 			SzX = szx;
 			SzY = szy;
-			_diagonalAllowed = diagonalAllowed;
+			DiagonalAllowed = diagonalAllowed;
 
 		}
 
@@ -136,12 +142,12 @@ namespace Pathfinding2D {
 			if(from.IsDiagonal(to)){
 
 				// if diagonal movement is not allowed, return false
-				if(!_diagonalAllowed)
+				if(!DiagonalAllowed)
 					return false;
 					
 				// get nodes of tiles adjacent to position AND destination
-				Node2D xAdjacent = new Node2D(from.X, to.Y, this, from);
-				Node2D yAdjacent = new Node2D(to.X, from.Y, this, from);
+				Node2D xAdjacent = new Node2D(from.X, to.Y, this);
+				Node2D yAdjacent = new Node2D(to.X, from.Y, this);
 
 				// if cannot pass through both both adjacencies from position, return false
 				if(!this.CanGo(from, xAdjacent) || !this.CanGo(from, yAdjacent))

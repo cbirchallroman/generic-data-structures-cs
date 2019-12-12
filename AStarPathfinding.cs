@@ -31,28 +31,42 @@ namespace AStarPathfinding {
 
 		}
 
-		public Queue<N> FindPath(N start, List<N> ends){
+		public Queue<N> FindPath(N from, N to){
+
+			PriorityQueue<N> queue = new PriorityQueue<N>();
+			to.SetGoal(from);
+			queue.Enqueue(to);
+
+			return FindPathHelper(from, queue);
+
+		}
+
+		public Queue<N> FindPath(N from, List<N> toList){
 
 			// if no ending nodes, return null
-			if(ends.Count == 0)
+			if(toList.Count == 0)
 				return null;
 
 			PriorityQueue<N> queue = new PriorityQueue<N>();	// order in which nodes will be searched
 
-			// using a dictionary because access is O(n)
-			Dictionary<int, float> weights = new Dictionary<int, float>();
-			Dictionary<int, bool> visited = new Dictionary<int, bool>();
+			// for each possible exit, set weight to 0 and have no edge to previous node
+			foreach(N n in toList){
 
-			// we are doing the algorithm in reverse
-			//	that way the user may search for paths to multiple exit points from one starting position
-			N goal = start;
-			foreach(N n in ends){
-
-				// for each possible exit, set weight to 0 and have no edge to previous node
-				n.SetWeight(0, 0, 0);
+				n.SetGoal(from);
 				queue.Enqueue(n);
 
 			}
+
+			// return null if no path found
+			return FindPathHelper(from, queue);
+
+		}
+
+		private Queue<N> FindPathHelper(N goal, PriorityQueue<N> queue){
+
+			// using a dictionary because access is O(n)
+			Dictionary<int, float> weights = new Dictionary<int, float>();
+			Dictionary<int, bool> visited = new Dictionary<int, bool>();
 
 			// while there are still unvisited nodes enqueued
 			while(queue.Count > 0){
@@ -65,8 +79,7 @@ namespace AStarPathfinding {
 				// if this is the goal, iterate through nodes to construct the path
 				if(current.Equals(goal)){
 
-					// use the parent as the argument because we don't want to include the start node (ie. current) itself
-					return RetracePath(current.Parent);
+					return current.RetracePath();
 
 				}
 
@@ -78,17 +91,6 @@ namespace AStarPathfinding {
 					//	so referring to visited.ContainsKey(int) is a safe bet
 					if(visited.ContainsKey(neighbor.GetIndex()))
 						continue;
-
-					// f = total priority weight of neighbor
-					//	f = g + h
-					//	g = distance traveled up to current + cost of traveling through neighbor
-					//	h = distance from neighbor to goal
-					float distanceTraveled = current.DistanceTraveled;
-					float travelScore = current.GetTravelCost(neighbor);
-					float heuristic = neighbor.GetDistance(goal);
-					
-					// set weight (f) of neighbor
-					neighbor.SetWeight(distanceTraveled, travelScore, heuristic);
 
 					// if queue contains neighbor already, replace with new object if weight is smaller
 					//	otherwise don't consider any further
@@ -110,27 +112,7 @@ namespace AStarPathfinding {
 
 			}
 
-			// return null if no path found
 			return null;
-
-		}
-
-		public Queue<N> RetracePath(N start){
-
-			// create stack of nodes
-			Queue<N> path = new Queue<N>();
-
-			// point 'current' to start, push current to path
-			N current = start;
-			path.Enqueue(current);
-
-			// while current has a parent, set to parent and push to path
-			while(current.Parent != null){
-				current = current.Parent;
-				path.Enqueue(current);
-			}
-
-			return path;
 
 		}
 
@@ -140,14 +122,36 @@ namespace AStarPathfinding {
 	public abstract class Node<N> : IComparable<N> where N : Node<N>  {
 
 		public N Parent{ get; private set; }	// previous node from the pathfinder
-		public float DistanceTraveled { get; private set; }
-		private float _travelScore;
+		public N Goal { get; private set; }
+		private float _distanceTraveled;
 		private float _heuristic;
-		public float Weight { get { return DistanceTraveled + _travelScore + _heuristic; } }
+		public float Weight { get {
+			return _distanceTraveled + _heuristic; } }
 
 		/* CONSTRUCTORS */
-		public Node() { Parent = null; }
-		public Node(N parent){ Parent = parent; }
+		public Node(){ }
+
+		public void SetParent(N parent){
+
+			Parent = parent;
+			if(Parent == null)
+				_distanceTraveled = 0;
+			else{
+				_distanceTraveled = Parent._distanceTraveled + Parent.GetTravelCost((N)this);
+				SetGoal(Parent.Goal);
+			}
+
+		}
+
+		public void SetGoal(N goal){
+
+			Goal = goal;
+			if(Goal == null)
+				_heuristic = 0;
+			else
+				_heuristic = GetDistance(Goal);
+
+		}
 
 		/* IMPLEMENTED METHODS */
 		public int CompareTo(N obj){ return (int)(this.Weight - obj.Weight); }
@@ -158,16 +162,6 @@ namespace AStarPathfinding {
 			
 			N other = (N)obj;
 			return Equals(other);
-
-		}
-
-		/* FINAL METHODS */
-		// 
-		public void SetWeight(float distanceTraveled, float travelScore, float heuristic){
-
-			DistanceTraveled = distanceTraveled;
-			_travelScore = travelScore;
-			_heuristic = heuristic;
 
 		}
 
@@ -192,6 +186,24 @@ namespace AStarPathfinding {
 			}
 
 			return index;
+
+		}
+
+		public Queue<N> RetracePath(){
+
+			// create stack of nodes
+			Queue<N> path = new Queue<N>();
+
+			// point 'current' to start, and don't push this node because it won't be included in the path
+			N current = (N)this;
+
+			// while current has a parent, set to parent and push to path
+			while(current.Parent != null){
+				current = current.Parent;
+				path.Enqueue(current);
+			}
+
+			return path;
 
 		}
 		
