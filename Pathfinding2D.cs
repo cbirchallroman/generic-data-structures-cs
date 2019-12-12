@@ -28,7 +28,10 @@ namespace Pathfinding2D {
 		// returns world index of node by calculating w/ local matrix coordinates
 		public override int GetIndex(){
 
-			return X * _conditions.SzX + Y;	// row-major order
+			//int index = X * (_conditions.SzX - 1) + Y;
+			int index = GetIndex(new int[]{X, Y}, new int[]{_conditions.SzX, _conditions.SzY});
+			Console.WriteLine(this + " " + index);
+			return index;	// row-major order
 
 		}
 		
@@ -127,7 +130,7 @@ namespace Pathfinding2D {
 		public bool CanGo(Node2D from, Node2D to){
 
 			// if out of bounds, return false
-			if(IsOutOfBounds(to))
+			if(IsOutOfBounds(to) || IsOutOfBounds(from))
 				return false;
 
 			// if destination is diagonal from position

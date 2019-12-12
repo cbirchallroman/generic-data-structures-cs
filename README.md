@@ -48,7 +48,7 @@ Under this subclass, override the following abstract functions, where N is the t
 
 ```c#
 public abstract bool Equals(N other);	// checks if this node is equal to node of same type (ie. same coordinates)
-public abstract int GetIndex();	// get world index of this node. it's easy to use the protected function GetIndex(int[]), that takes coordinates and world dimensions to do this with no hassle
+public abstract int GetIndex();	// get world index of this node. it's easy to use the protected function GetIndex(int[]), that takes coordinates and world dimensions to do this. however, this function is O(n^d) where d is the number of dimensions. it's easier to make your own function that doesn't loop! the implementation in Pathfinding2D calls this function, but a hardcoded implementation is commented right above.
 public abstract int GetTravelCost(N to);	// get cost of traveling to other node of same type
 public abstract float GetDistance(N to);	// get distance from this node to other node of same type
 public abstract List<N> GetNeighbors();	// get accessible nodes adjacent to this node

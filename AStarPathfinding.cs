@@ -162,11 +162,36 @@ namespace AStarPathfinding {
 		}
 
 		/* FINAL METHODS */
+		// 
 		public void SetWeight(int distanceTraveled, int travelScore, float heuristic){
 
 			DistanceTraveled = distanceTraveled;
 			_travelScore = travelScore;
 			_heuristic = heuristic;
+
+		}
+
+		// returns index of node based on coordinates and world size
+		protected int GetIndex(int[] coordinates, int[] worldSize){
+
+			int rank = worldSize.Length;	// the number of dimensions
+
+			// if the coordinates and world size have different dimensions, return -1
+			if(coordinates.Length != rank)
+				return -1;
+			
+
+			int factor = 1;	// multiplication factor begins at 1
+			int index = coordinates[rank - 1]; // the last component is added without multiplying it first
+
+			for(int dimension = rank - 2; dimension >= 0; dimension--){
+
+				factor *= worldSize[dimension + 1];	// multiply factor by previous size dimension
+				index += coordinates[dimension] * factor;	// add component times factor
+
+			}
+
+			return index;
 
 		}
 		
