@@ -6,17 +6,19 @@ using PriorityQueue;
 
 namespace AStarPathfinding {
 
+	public enum Algorithm { AStar, Dijkstra, Greedy }
+
 	public class Pathfinder<N> where N : Node<N> {
 
 		private int[] _dimensions;
-		private bool _useHeuristic;
+		public Algorithm Type { get; private set; }
 
 		// derivatives of Node class will exist on the same plane as the Pathfinder that accesses them
-		public Pathfinder(int[] dimensions) : this(dimensions, true){ }
-		public Pathfinder(int[] dimensions, bool useHeuristic){
+		public Pathfinder(int[] dimensions) : this(dimensions, Algorithm.AStar){ }
+		public Pathfinder(int[] dimensions, Algorithm type){
 
 			_dimensions = dimensions;
-			_useHeuristic = useHeuristic;
+			Type = type;
 
 		}
 
@@ -37,8 +39,8 @@ namespace AStarPathfinding {
 		public Queue<N> FindPath(N from, N to){
 
 			PriorityQueue<N> queue = new PriorityQueue<N>();
-			if(_useHeuristic)
-				to.SetGoal(from);
+			to.SetGoal(from);
+			to.SetType(Type);
 			queue.Enqueue(to);
 
 			return FindPathHelper(from, queue);
@@ -56,8 +58,8 @@ namespace AStarPathfinding {
 			// for each possible exit, set weight to 0 and have no edge to previous node
 			foreach(N n in toList){
 
-				if(_useHeuristic)
-					n.SetGoal(from);
+				n.SetGoal(from);
+				n.SetType(Type);
 				queue.Enqueue(n);
 
 			}
@@ -130,12 +132,11 @@ namespace AStarPathfinding {
 	[System.Serializable]
 	public abstract class Node<N> : IComparable<N> where N : Node<N>  {
 
-		public N Parent{ get; private set; }	// previous node from the pathfinder
-		public N Goal { get; private set; }
+		protected N Goal { get; private set; }	// final destination node
+		protected N Parent{ get; private set; }	// previous node from the pathfinder
+		protected Algorithm Type { get; private set; }	// algorithm according to which priority (weight) is determined
 		private float _distanceTraveled;
 		private float _heuristic;
-		public float Weight { get {
-			return _distanceTraveled + _heuristic; } }
 
 		/* CONSTRUCTORS */
 		public Node(){ }
@@ -148,6 +149,7 @@ namespace AStarPathfinding {
 			else{
 				_distanceTraveled = Parent._distanceTraveled + Parent.GetTravelCost((N)this);
 				SetGoal(Parent.Goal);
+				SetType(Parent.Type);
 			}
 
 		}
@@ -162,8 +164,29 @@ namespace AStarPathfinding {
 
 		}
 
+		public void SetType(Algorithm type){
+
+			Type = type;
+
+		}
+
 		/* IMPLEMENTED METHODS */
 		public int CompareTo(N obj){ return (int)(this.Weight - obj.Weight); }
+
+		// returns node priority depending upon selected algorithm
+		public float Weight { get {
+
+			switch(Type){
+				case Algorithm.Dijkstra:
+					return _distanceTraveled;
+				case Algorithm.Greedy:
+					return _heuristic;
+				default:
+					return _distanceTraveled + _heuristic;
+			}
+
+		} }
+
 		public override bool Equals(Object obj){
 
 			if(obj.GetType() != GetType())

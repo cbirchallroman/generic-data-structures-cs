@@ -55,11 +55,11 @@ public abstract List<N> GetNeighbors(); // get accessible nodes adjacent to this
 public override abstract int GetHashCode(); // get hashcode of node subclass
 ```
 
-Create a Pathfinder object that refers to the subclass of Node that you implemented. Supply it with the dimensions of your world (or the surface/body of space being considered), and whether to use the heuristic function to prioritize nodes. Setting this to 'false' basically turns the algorithm into Dijkstra's algorithm. This parameter may also be omitted, and the default value for this setting is 'true'.
+Create a Pathfinder object that refers to the subclass of Node that you implemented. Supply it with the dimensions of your world (or the surface/body of space being considered), and which algorithm {AStar, Dijkstra, Greedy} to use. If the second parameter is omitted, the default algorithm is AStar.
 
 ```c#
 int[] dimensions = new int{100, 100};
-Pathfinder<TestNode> pathfinder = new Pathfinder<>(dimensions, true);
+Pathfinder<TestNode> pathfinder = new Pathfinder<>(dimensions, Algorithm.Dijkstra);
 ```
 
 Finally, call FindPath(N, N) which takes one starting position and one exit point. The function returns a queue of nodes.
