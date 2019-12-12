@@ -47,28 +47,32 @@ class TestNode : Node<TestNode> { /*...*/ }
 Under this subclass, override the following abstract functions, where N is the type of your subclass:
 
 ```c#
-public abstract bool Equals(N other);	// checks if this node is equal to node of same type (ie. same coordinates)
-public abstract int GetIndex();	// get world index of this node. it's easy to use the protected function GetIndex(int[], int[]), that takes coordinates and world dimensions to do this. however, this function is O(n^d) where d is the number of dimensions. it's easier to make your own function that doesn't loop! the implementation in Pathfinding2D calls this function, but a hardcoded implementation is commented right above.
-public abstract int GetTravelCost(N to);	// get cost of traveling to other node of same type
-public abstract float GetDistance(N to);	// get distance from this node to other node of same type
-public abstract List<N> GetNeighbors();	// get accessible nodes adjacent to this node
-public override abstract int GetHashCode();	// get hashcode of node subclass
+public abstract bool Equals(N other); // checks if this node is equal to node of same type (ie. same coordinates)
+public abstract int GetIndex(); // get world index of this node. it's easy to use the protected function GetIndex(int[], int[]), that takes coordinates and world dimensions to do this. however, this function is O(n^d) where d is the number of dimensions. it's easier to make your own function that doesn't loop! the implementation in Pathfinding2D calls this function, but a hardcoded implementation is commented right above.
+public abstract int GetTravelCost(N to); // get cost of traveling to other node of same type
+public abstract float GetDistance(N to); // get distance from this node to other node of same type
+public abstract List<N> GetNeighbors(); // get accessible nodes adjacent to this node
+public override abstract int GetHashCode(); // get hashcode of node subclass
 ```
 
-Create a Pathfinder object that refers to the subclass of Node that you implemented, and supply it with the dimensions of your world (or the surface/body of space being considered).
+Create a Pathfinder object that refers to the subclass of Node that you implemented. Supply it with the dimensions of your world (or the surface/body of space being considered), and whether to use the heuristic function to prioritize nodes. Setting this to 'false' basically turns the algorithm into Dijkstra's algorithm. This parameter may also be omitted, and the default value for this setting is 'true'.
 
 ```c#
 int[] dimensions = new int{100, 100};
-Pathfinder<TestNode> pathfinder = new Pathfinder<>(dimensions);
+Pathfinder<TestNode> pathfinder = new Pathfinder<>(dimensions, true);
 ```
 
-Finally, call FindPath(N, List<N>) which takes one starting position and any number of exit points. The function returns a queue of nodes.
+Finally, call FindPath(N, N) which takes one starting position and one exit point. The function returns a queue of nodes.
 
 ```c#
 // assume that nodes 'start' and 'end' of type TestNode have been instantiated
-List<TestNode> ends = new List<TestNode>();
-ends.Add(end);
+Queue<TestNode> path = pf.FindPath(start, end);
 
-// call pathfinder
-Queue<TestNode> path = pf.FindPath(start, ends);
+// ALTERNATIVELY, call FindPath(N, List<N>) to look for multiple possible exits
+List<TestNode> endList = new List<TestNode>();
+endList.Add(end);
+endList.Add(end2);
+endList.Add(end3);
+Queue<TestNode> path = pf.FindPath(start, endList);
+
 ```
