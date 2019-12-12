@@ -123,6 +123,7 @@ namespace AStarPathfinding {
 
 			}
 
+			Console.WriteLine(count + " nodes counted");
 			return null;
 
 		}
@@ -171,7 +172,7 @@ namespace AStarPathfinding {
 		}
 
 		/* IMPLEMENTED METHODS */
-		public int CompareTo(N obj){ return (int)(this.Weight - obj.Weight); }
+		public int CompareTo(N obj){ return (int)(obj.Weight - this.Weight); }
 
 		// returns node priority depending upon selected algorithm
 		public float Weight { get {
