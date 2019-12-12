@@ -227,12 +227,6 @@ namespace PriorityQueue {
 
 		}
 
-		public bool Contains(T element){
-
-			return FindIndex(element) != -1;
-
-		}
-
 	}
 
 }
