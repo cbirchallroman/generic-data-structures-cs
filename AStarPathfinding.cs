@@ -9,11 +9,14 @@ namespace AStarPathfinding {
 	public class Pathfinder<N> where N : Node<N> {
 
 		private int[] _dimensions;
+		private bool _useHeuristic;
 
 		// derivatives of Node class will exist on the same plane as the Pathfinder that accesses them
-		public Pathfinder(int[] dimensions){
+		public Pathfinder(int[] dimensions) : this(dimensions, true){ }
+		public Pathfinder(int[] dimensions, bool useHeuristic){
 
 			_dimensions = dimensions;
+			_useHeuristic = useHeuristic;
 
 		}
 
@@ -34,7 +37,8 @@ namespace AStarPathfinding {
 		public Queue<N> FindPath(N from, N to){
 
 			PriorityQueue<N> queue = new PriorityQueue<N>();
-			to.SetGoal(from);
+			if(_useHeuristic)
+				to.SetGoal(from);
 			queue.Enqueue(to);
 
 			return FindPathHelper(from, queue);
@@ -52,7 +56,8 @@ namespace AStarPathfinding {
 			// for each possible exit, set weight to 0 and have no edge to previous node
 			foreach(N n in toList){
 
-				n.SetGoal(from);
+				if(_useHeuristic)
+					n.SetGoal(from);
 				queue.Enqueue(n);
 
 			}
@@ -68,10 +73,13 @@ namespace AStarPathfinding {
 			Dictionary<int, float> weights = new Dictionary<int, float>();
 			Dictionary<int, bool> visited = new Dictionary<int, bool>();
 
+			int count = 0;
+
 			// while there are still unvisited nodes enqueued
 			while(queue.Count > 0){
 
 				N current = queue.Dequeue();
+				count++;
 
 				// mark current node as visited
 				visited[current.GetIndex()] = true;
@@ -79,6 +87,7 @@ namespace AStarPathfinding {
 				// if this is the goal, iterate through nodes to construct the path
 				if(current.Equals(goal)){
 
+					Console.WriteLine(count + " nodes counted");
 					return current.RetracePath();
 
 				}

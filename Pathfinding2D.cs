@@ -94,7 +94,7 @@ namespace Pathfinding2D {
 		public override float GetTravelCost(Node2D to){
 
 			float cost = _conditions.GetTravelCost(to);	// simply get from _conditions
-			cost *= IsDiagonal(to) ? SQRT2 : 1;	// multiply by 1.4 if diagonal
+			//cost *= IsDiagonal(to) ? SQRT2 : 1;	// multiply by 1.4 if diagonal
 			return cost;
 
 		}
