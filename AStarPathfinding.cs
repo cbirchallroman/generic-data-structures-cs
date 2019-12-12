@@ -59,16 +59,16 @@ namespace AStarPathfinding {
 
 				N current = queue.Dequeue();
 
+				// mark current node as visited
+				visited[current.GetIndex()] = true;
+
 				// if this is the goal, iterate through nodes to construct the path
 				if(current.Equals(goal)){
 
-					// use the parent as the argument because we don't want to include the current node
+					// use the parent as the argument because we don't want to include the start node (ie. current) itself
 					return RetracePath(current.Parent);
 
 				}
-
-				// mark current node as visited
-				visited[current.GetIndex()] = true;
 
 				// enqueue neighbors
 				foreach(N neighbor in current.GetNeighbors()){
@@ -83,8 +83,8 @@ namespace AStarPathfinding {
 					//	f = g + h
 					//	g = distance traveled up to current + cost of traveling through neighbor
 					//	h = distance from neighbor to goal
-					int distanceTraveled = current.DistanceTraveled;
-					int travelScore = current.GetTravelCost(neighbor);
+					float distanceTraveled = current.DistanceTraveled;
+					float travelScore = current.GetTravelCost(neighbor);
 					float heuristic = neighbor.GetDistance(goal);
 					
 					// set weight (f) of neighbor
@@ -140,8 +140,8 @@ namespace AStarPathfinding {
 	public abstract class Node<N> : IComparable<N> where N : Node<N>  {
 
 		public N Parent{ get; private set; }	// previous node from the pathfinder
-		public int DistanceTraveled { get; private set; }
-		private int _travelScore;
+		public float DistanceTraveled { get; private set; }
+		private float _travelScore;
 		private float _heuristic;
 		public float Weight { get { return DistanceTraveled + _travelScore + _heuristic; } }
 
@@ -163,7 +163,7 @@ namespace AStarPathfinding {
 
 		/* FINAL METHODS */
 		// 
-		public void SetWeight(int distanceTraveled, int travelScore, float heuristic){
+		public void SetWeight(float distanceTraveled, float travelScore, float heuristic){
 
 			DistanceTraveled = distanceTraveled;
 			_travelScore = travelScore;
@@ -198,7 +198,7 @@ namespace AStarPathfinding {
 		/* ABSTRACT METHODS */
 		public abstract bool Equals(N other);	// checks if this node is equal to node of same type
 		public abstract int GetIndex();	// get world index of this node
-		public abstract int GetTravelCost(N to);	// get cost of traveling to other node of same type
+		public abstract float GetTravelCost(N to);	// get cost of traveling to other node of same type
 		public abstract float GetDistance(N to);	// get distance from this node to other node of same type
 		public abstract List<N> GetNeighbors();	// get accessible nodes adjacent to this node
 		public override abstract int GetHashCode();	// get hashcode of node subclass

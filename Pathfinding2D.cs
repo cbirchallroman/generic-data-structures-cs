@@ -10,7 +10,7 @@ namespace Pathfinding2D {
 		public int X { get; private set; }
 		public int Y { get; private set; }
 
-		private const int SQRT2 = 1;
+		private const float SQRT2 = 1.4f;
 		private PathConditions _conditions;
 
 		public Node2D(int x, int y, PathConditions conditions) : this(x, y, conditions, null){ }
@@ -30,7 +30,6 @@ namespace Pathfinding2D {
 
 			//int index = X * (_conditions.SzX - 1) + Y;
 			int index = GetIndex(new int[]{X, Y}, new int[]{_conditions.SzX, _conditions.SzY});
-			Console.WriteLine(this + " " + index);
 			return index;	// row-major order
 
 		}
@@ -52,7 +51,7 @@ namespace Pathfinding2D {
 
 			// return highest difference between coordinates
 			//	if neighbor is diagonal to current, add sqrt(2)
-			return (float)Math.Sqrt(dx * dx + dy * dy) + (IsDiagonal(to) ? SQRT2 : 0);
+			return (float)Math.Sqrt(dx * dx + dy * dy);
 
 		}
 
@@ -88,9 +87,9 @@ namespace Pathfinding2D {
 		}
 
 		// returns cost of traveling from this node to its neighbor
-		public override int GetTravelCost(Node2D to){
+		public override float GetTravelCost(Node2D to){
 
-			return _conditions.GetTravelCost(to);	// simply refer to _conditions
+			return _conditions.GetTravelCost(to) + (IsDiagonal(to) ? SQRT2 : 0);	// simply refer to _conditions, and include diagonal
 
 		}
 

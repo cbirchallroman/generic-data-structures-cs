@@ -93,11 +93,17 @@ namespace PriorityQueue {
 			}
 
 			// otherwise, swap with the bottommost element and downheap from the top
+			string status = this.ToString();
 			T last = _elements[_count];
 			_elements.RemoveAt(_count);
 			_count--;	// there's one less element in the queue
-			_elements[index] = last;
-			Downheap(index);
+
+			// if it wasn't the last element we were removing, move the last element to index and downheap
+			if(index <= _count){ 
+				_elements[index] = last;
+				Downheap(index);
+			}
+			
 
 		}
 
@@ -112,7 +118,7 @@ namespace PriorityQueue {
 
 		public override string ToString(){
 
-			string s = " (";
+			string s = " {";
 
 			// if there's something at the top of this queue, print that first
 			if(_count >= 1)
@@ -122,7 +128,7 @@ namespace PriorityQueue {
 			for(int i = 2; i <= _count; i++)
 				s += ", " + _elements[i];
 
-			return s + ")";
+			return s + "}";
 
 		}
 
