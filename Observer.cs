@@ -56,7 +56,14 @@ namespace Observer {
 		}
 
 		// find and notify certain observer of arguments
-		public abstract void Notify(N argument);
+		public virtual void Notify(N argument){
+
+			T observer = Select(argument);
+			if(observer == null)
+				throw new ObserverNotFoundException(argument);
+			Notify(observer, argument);
+
+		}
 
 		// notify given observer of arguments
 		public abstract void Notify(T observer, N argument);
@@ -65,7 +72,7 @@ namespace Observer {
 		public abstract T Select(N argument);
 
 		// exception thrown when Notify(N) fails to find an appropriate observer
-		public abstract class ObserverNotFoundException : Exception {
+		public class ObserverNotFoundException : Exception {
 
 			private N _argument;
 
@@ -76,7 +83,7 @@ namespace Observer {
 			}
 
 			// message that can be printed
-			public override abstract string Message { get; }
+			public override string Message { get { return "Observer not found for argument " + _argument; } }
 
 
 		}
@@ -85,9 +92,9 @@ namespace Observer {
 
 	public interface IListener<N> {
 
-		public void SetID(int index);	// set ID of this element
-		public int GetID();	// get ID of this element
-		public void Update(N argument);	// act according to given arguments
+		void SetID(int index);	// set ID of this element
+		int GetID();	// get ID of this element
+		void Update(N argument);	// act according to given arguments
 
 	}
 

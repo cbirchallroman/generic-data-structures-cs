@@ -167,6 +167,9 @@ namespace AStarPathfinding {
 		}
 
 		/* IMPLEMENTED METHODS */
+		// this function allows the pathfinding algorithm to get the next available node
+		//	in general, it allows the user to sort nodes together based on relative weight in a priority queue
+		//	thus a priorityqueue of nodes set to "greedy" type can be used to get the node closest to some given point
 		public int CompareTo(N obj){ return (int)(obj.Weight - this.Weight); }
 
 		// returns node priority depending upon selected algorithm

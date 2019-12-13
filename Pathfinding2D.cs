@@ -5,18 +5,25 @@ using AStarPathfinding;
 namespace Pathfinding2D {
 
 	[System.Serializable]
-	class Node2D : Node<Node2D> {
+	class Node2D<W> : Node<Node2D<W>> where W : World<W> {
 
 		public int X { get; private set; }
 		public int Y { get; private set; }
 
 		private const float SQRT2 = 1.4f;
-		private PathConditions _conditions;
+		private PathConditions<W> _conditions;
+		private W _world;
 
-		public Node2D(int x, int y, PathConditions conditions){
+		public Node2D(int x, int y, W world){
 
 			X = x;
 			Y = y;
+			_world = world;
+
+		}
+
+		public void SetConditions(PathConditions<W> conditions){
+
 			_conditions = conditions;
 
 		}
@@ -27,13 +34,13 @@ namespace Pathfinding2D {
 		public override int GetIndex(){
 
 			//int index = X * (_conditions.SzX - 1) + Y;
-			int index = GetIndex(new int[]{X, Y}, new int[]{_conditions.SzX, _conditions.SzY});
+			int index = GetIndex(new int[]{X, Y}, _world.Dimensions);
 			return index;	// row-major order
 
 		}
 		
 		// if the other node is not on the same row or column as this node, return false
-		public bool IsDiagonal(Node2D to) {
+		public bool IsDiagonal(Node2D<W> to) {
 			
 			int dx = Math.Abs(X - to.X), dy = Math.Abs(Y - to.Y);
 			return dx > 0 && dy > 0;
@@ -42,7 +49,7 @@ namespace Pathfinding2D {
 
 		// returns the furthest distance along one axis
 		//	this is more accurate for the heuristic than using manhattan distance
-		public override float GetDistance(Node2D to) {
+		public override float GetDistance(Node2D<W> to) {
 
 			// difference between coordinates
 			int dx = Math.Abs(X - to.X);
@@ -58,9 +65,9 @@ namespace Pathfinding2D {
 		}
 
 		// returns accessible nodes adjacent to this node
-		public override List<Node2D> GetNeighbors() {
+		public override List<Node2D<W>> GetNeighbors() {
 
-			List<Node2D> neighbors = new List<Node2D>();
+			List<Node2D<W>> neighbors = new List<Node2D<W>>();
 
 			// look at neighbors 1 spot away
 			for(int dx = -1; dx <= 1; dx++){
@@ -71,7 +78,7 @@ namespace Pathfinding2D {
 						continue;
 
 					// create node
-					Node2D neighbor = new Node2D(X + dx, Y + dy, _conditions);
+					Node2D<W> neighbor = new Node2D<W>(X + dx, Y + dy, _world);
 					
 					// if this node can be traveled to, add it to the list
 					//	KEEP IN MIND THAT THE ALGORITHM SEARCHES FROM FINISH TO START POSITION
@@ -79,6 +86,7 @@ namespace Pathfinding2D {
 					//	YOU NEED TO CALL "_conditions.CanGo(B, A)" INSTEAD
 					if(_conditions.CanGo(neighbor, this)){
 						neighbor.SetParent(this);
+						neighbor.SetConditions(_conditions);
 						neighbors.Add(neighbor);
 					}
 
@@ -91,16 +99,16 @@ namespace Pathfinding2D {
 		}
 
 		// returns cost of traveling from this node to its neighbor
-		public override float GetTravelCost(Node2D to){
+		public override float GetTravelCost(Node2D<W> to){
 
-			float cost = _conditions.GetTravelCost(to);	// simply get from _conditions
+			float cost = _world.GetTravelCost(to);	// simply get from _world
 			cost *= IsDiagonal(to) ? SQRT2 : 1;	// multiply by 1.4 if diagonal
 			return cost;
 
 		}
 
 		// returns true if coordinates are the same
-		public override bool Equals(Node2D other){
+		public override bool Equals(Node2D<W> other){
 
 			return X == other.X && Y == other.Y;
 
@@ -116,26 +124,39 @@ namespace Pathfinding2D {
 	}
 
 	[System.Serializable]
-	class PathConditions {
+	abstract class World<W> where W : World<W>{
 
-		private int[,] _world;
-		public int SzX { get; private set; }
-		public int SzY { get; private set; }
-		public bool DiagonalAllowed { get; private set; }
+		public int SizeX { get; protected set; }
+		public int SizeY { get; protected set; }
+		public int[] Dimensions { get { return new int[]{SizeX, SizeY}; } }
+		
+		public bool IsOutOfBounds(Node2D<W> node){
 
-		public PathConditions(int[,] world, int szx, int szy, bool diagonalAllowed) {
+			return node.X < 0 || node.X >= SizeX || node.Y < 0 || node.Y >= SizeY;
+
+		}
+
+		public abstract int GetTravelCost(Node2D<W> node);
+
+	}
+
+	[System.Serializable]
+	abstract class PathConditions<W> where W : World<W> {
+
+		protected W _world;
+		public bool DiagonalAllowed { get; protected set; }
+
+		public PathConditions(W world, bool diagonalAllowed) {
 
 			_world = world;
-			SzX = szx;
-			SzY = szy;
 			DiagonalAllowed = diagonalAllowed;
 
 		}
 
-		public bool CanGo(Node2D from, Node2D to){
+		public bool CanGo(Node2D<W> from, Node2D<W> to){
 
 			// if out of bounds, return false
-			if(IsOutOfBounds(to) || IsOutOfBounds(from))
+			if(_world.IsOutOfBounds(to) || _world.IsOutOfBounds(from))
 				return false;
 
 			// if destination is diagonal from position
@@ -146,35 +167,21 @@ namespace Pathfinding2D {
 					return false;
 					
 				// get nodes of tiles adjacent to position AND destination
-				Node2D xAdjacent = new Node2D(from.X, to.Y, this);
-				Node2D yAdjacent = new Node2D(to.X, from.Y, this);
+				Node2D<W> xAdjacent = new Node2D<W>(from.X, to.Y, _world);
+				Node2D<W> yAdjacent = new Node2D<W>(to.X, from.Y, _world);
 
 				// if cannot pass through both both adjacencies from position, return false
-				if(!this.CanGo(from, xAdjacent) || !this.CanGo(from, yAdjacent))
+				if(!CanGo(from, xAdjacent) || !CanGo(from, yAdjacent))
 					return false;
 				
 			}
 
-			// simply return if tile value is 0, meaning walkable
-			int tileTo = _world[to.X, to.Y];
-			int tileFrom = _world[to.X, to.Y];
-			return tileTo == 0 && tileFrom == 0;
+			// determine with implementation-specific function from here
+			return CanGoConditions(from, to);
 
 		}
 
-		// cost of traveling between any tile is simply 1
-		public int GetTravelCost(Node2D to){
-
-			return _world[to.X, to.Y] + 1;
-
-		}
-
-		// returns false if dimensions of world marix are exceeded
-		private bool IsOutOfBounds(Node2D to){
-
-			return to.X < 0 || to.X >= SzX || to.Y < 0 || to.Y >= SzY;
-
-		}
+		protected abstract bool CanGoConditions(Node2D<W> from, Node2D<W> to);
 
 	}
 
