@@ -54,6 +54,9 @@ namespace Observer {
 
 		}
 
+		// find and notify certain observer of arguments
+		public abstract void Notify(params string[] args);
+
 		// notify selected observer of arguments
 		public abstract void Notify(T observer, params string[] args);
 
@@ -66,7 +69,7 @@ namespace Observer {
 
 		public void SetID(int index);	// set ID of this element
 		public int GetID();	// get ID of this element
-		public void Update(params string[] args);
+		public void Update(params string[] args);	// act according to given arguments
 
 	}
 
