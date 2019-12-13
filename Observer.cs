@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
 using PriorityQueue;
 
 namespace Observer {
 
-	public abstract class Subject<T> where T : IObserver<T> {
+	public abstract class Subject<T, N> where T : IListener<N> {
 
 		private Dictionary<int, T> _observers;	// container of all observers according to their ID number
 		private PriorityQueue<int> _pendingIDNumbers;	// ID numbers of previously removed elements
@@ -44,42 +45,59 @@ namespace Observer {
 		}
 
 		// notify all observers of arguments
-		public void NotifyAll(params string[] args){
+		public void NotifyAll(N argument){
 
 			foreach(int index in _observers.Keys){
 
-				Notify(_observers[index], args);
+				Notify(_observers[index], argument);
 
 			}
 
 		}
 
 		// find and notify certain observer of arguments
-		public abstract void Notify(params string[] args);
+		public abstract void Notify(N argument);
 
-		// notify selected observer of arguments
-		public abstract void Notify(T observer, params string[] args);
+		// notify given observer of arguments
+		public abstract void Notify(T observer, N argument);
 
 		// select observer to accept arguments
-		public abstract T Select(params string[] args);
+		public abstract T Select(N argument);
+
+		// exception thrown when Notify(N) fails to find an appropriate observer
+		public abstract class ObserverNotFoundException : Exception {
+
+			private N _argument;
+
+			public ObserverNotFoundException(N argument) {
+
+				_argument = argument;
+
+			}
+
+			// message that can be printed
+			public override abstract string Message { get; }
+
+
+		}
 
 	}
 
-	public interface IObserver<T> where T : IObserver<T> {
+	public interface IListener<N> {
 
 		public void SetID(int index);	// set ID of this element
 		public int GetID();	// get ID of this element
-		public void Update(params string[] args);	// act according to given arguments
+		public void Update(N argument);	// act according to given arguments
 
 	}
 
-	public abstract class BasicObserver : IObserver<BasicObserver> {
+	public abstract class BasicObserver<N> : IListener<N> {
 
 		private int _ID;
 
 		public void SetID(int index){ _ID = index; }
 		public int GetID() { return _ID; }
-		public abstract void Update(params string[] args);
+		public abstract void Update(N argument);
 
 	}
 
