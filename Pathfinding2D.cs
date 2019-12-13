@@ -45,9 +45,8 @@ namespace Pathfinding2D {
 		public override float GetDistance(Node2D to) {
 
 			// difference between coordinates
-			int dx = Math.Abs(X - to.X), dy = Math.Abs(Y - to.Y);
-
-			bool diagonalAllowed = _conditions.DiagonalAllowed;
+			int dx = Math.Abs(X - to.X);
+			int dy = Math.Abs(Y - to.Y);
 
 			// octile distance if diagonal movement allowed
 			if(_conditions.DiagonalAllowed)
@@ -73,14 +72,15 @@ namespace Pathfinding2D {
 
 					// create node
 					Node2D neighbor = new Node2D(X + dx, Y + dy, _conditions);
-					neighbor.SetParent(this);
 					
 					// if this node can be traveled to, add it to the list
 					//	KEEP IN MIND THAT THE ALGORITHM SEARCHES FROM FINISH TO START POSITION
 					// 	THEREFORE, IF YOU WANT TO SEE IF YOU CAN GO FROM TILE A TO TILE B
 					//	YOU NEED TO CALL "_conditions.CanGo(B, A)" INSTEAD
-					if(_conditions.CanGo(neighbor, this))
+					if(_conditions.CanGo(neighbor, this)){
+						neighbor.SetParent(this);
 						neighbors.Add(neighbor);
+					}
 
 				}
 			}
@@ -156,15 +156,16 @@ namespace Pathfinding2D {
 			}
 
 			// simply return if tile value is 0, meaning walkable
-			int tile = _world[to.X, to.Y];
-			return tile == 0;
+			int tileTo = _world[to.X, to.Y];
+			int tileFrom = _world[to.X, to.Y];
+			return tileTo == 0 && tileFrom == 0;
 
 		}
 
 		// cost of traveling between any tile is simply 1
 		public int GetTravelCost(Node2D to){
 
-			return 1;
+			return _world[to.X, to.Y] + 1;
 
 		}
 

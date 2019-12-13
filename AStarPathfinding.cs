@@ -75,13 +75,10 @@ namespace AStarPathfinding {
 			Dictionary<int, float> weights = new Dictionary<int, float>();
 			Dictionary<int, bool> visited = new Dictionary<int, bool>();
 
-			int count = 0;
-
 			// while there are still unvisited nodes enqueued
 			while(queue.Count > 0){
 
 				N current = queue.Dequeue();
-				count++;
 
 				// mark current node as visited
 				visited[current.GetIndex()] = true;
@@ -89,7 +86,6 @@ namespace AStarPathfinding {
 				// if this is the goal, iterate through nodes to construct the path
 				if(current.Equals(goal)){
 
-					Console.WriteLine(count + " nodes counted");
 					return current.RetracePath();
 
 				}
@@ -123,7 +119,6 @@ namespace AStarPathfinding {
 
 			}
 
-			Console.WriteLine(count + " nodes counted");
 			return null;
 
 		}
