@@ -4,89 +4,50 @@ using PriorityQueue;
 
 namespace Observer {
 
-	public abstract class Subject<T, N> where T : IListener<N> {
+	// P is passed onto the Subject
+	// A is passed onto the Observer(s) from the Subject
+	public abstract class Subject<O, TInput, TOutput> where O : IListener<TOutput> {
 
-		private Dictionary<int, T> _observers;	// container of all observers according to their ID number
+		protected Dictionary<int, O> Observers;	// container of all observers according to their ID number
 		private PriorityQueue<int> _pendingIDNumbers;	// ID numbers of previously removed elements
 		private int _nextHighestID;
 
 		public Subject(){
 
-			_observers = new Dictionary<int, T>();
+			Observers = new Dictionary<int, O>();
 			_pendingIDNumbers = new PriorityQueue<int>(true);
 			_nextHighestID = 0;
 
 		}
 
 		// add observer to container of observers
-		public void Attach(T observer){
+		public void Attach(O observer){
 
 			// if available, use the ID number of a previously removed element
 			int index = _pendingIDNumbers.Count > 0 ? _pendingIDNumbers.Dequeue() : _nextHighestID++;
-			_observers[index] = observer;
+			Observers[index] = observer;
 			observer.SetID(index);
 
 		}
 
 		// remove observer from container of observers
-		public void Detach(T observer){
+		public void Detach(O observer){
 
 			// get the ID of the given observer
 			int index = observer.GetID();
 
 			// if the observer is not contained, do not proceed
-			if(!_observers.ContainsKey(index))
+			if(!Observers.ContainsKey(index))
 				return;
 
 			// remove the observer at that index and enqueue its ID to be reused by a new observer
-			_observers.Remove(index);
+			Observers.Remove(index);
 			_pendingIDNumbers.Enqueue(index);
 
 		}
 
 		// notify all observers of arguments
-		public void NotifyAll(N argument){
-
-			foreach(int index in _observers.Keys){
-
-				Notify(_observers[index], argument);
-
-			}
-
-		}
-
-		// find and notify certain observer of arguments
-		public virtual void Notify(N argument){
-
-			T observer = Select(argument);
-			if(observer == null)
-				throw new ObserverNotFoundException(argument);
-			Notify(observer, argument);
-
-		}
-
-		// notify given observer of arguments
-		public abstract void Notify(T observer, N argument);
-
-		// select observer to accept arguments
-		public abstract T Select(N argument);
-
-		// exception thrown when Notify(N) fails to find an appropriate observer
-		public class ObserverNotFoundException : Exception {
-
-			private N _argument;
-
-			public ObserverNotFoundException(N argument) {
-
-				_argument = argument;
-
-			}
-
-			// message that can be printed
-			public override string Message { get { return "Observer not found for argument " + _argument; } }
-
-
-		}
+		public abstract void Notify(TInput argument);
 
 	}
 

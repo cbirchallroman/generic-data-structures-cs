@@ -10,44 +10,17 @@ namespace AStarPathfinding {
 
 	public class Pathfinder<N> where N : Node<N> {
 
-		private int[] _dimensions;
-		public Algorithm Type { get; private set; }
-
-		// derivatives of Node class will exist on the same plane as the Pathfinder that accesses them
-		public Pathfinder(int[] dimensions) : this(dimensions, Algorithm.AStar){ }
-		public Pathfinder(int[] dimensions, Algorithm type){
-
-			_dimensions = dimensions;
-			Type = type;
-
-		}
-
-		private int GetArea(){
-
-			int product = 0;
-			foreach(int d in _dimensions){
-				if(product == 0)
-					product = d;
-				else if(d != 0)
-					product *= d;
-			}
-
-			return product;
-
-		}
-
-		public Queue<N> FindPath(N from, N to){
+		public Queue<N> FindPath(N from, N to, Algorithm type){
 
 			PriorityQueue<N> queue = new PriorityQueue<N>();
-			to.SetGoal(from);
-			to.SetType(Type);
+			to.SetWeightConditions(from, type);
 			queue.Enqueue(to);
 
 			return FindPathHelper(from, queue);
 
 		}
 
-		public Queue<N> FindPath(N from, List<N> toList){
+		public Queue<N> FindPath(N from, List<N> toList, Algorithm type){
 
 			// if no ending nodes, return null
 			if(toList.Count == 0)
@@ -58,8 +31,7 @@ namespace AStarPathfinding {
 			// for each possible exit, set weight to 0 and have no edge to previous node
 			foreach(N n in toList){
 
-				n.SetGoal(from);
-				n.SetType(Type);
+				n.SetWeightConditions(from, type);
 				queue.Enqueue(n);
 
 			}
@@ -144,25 +116,19 @@ namespace AStarPathfinding {
 				_distanceTraveled = 0;
 			else{
 				_distanceTraveled = Parent._distanceTraveled + Parent.GetTravelCost((N)this);
-				SetGoal(Parent.Goal);
-				SetType(Parent.Type);
+				SetWeightConditions(Parent.Goal, Parent.Type);
 			}
 
 		}
 
-		public void SetGoal(N goal){
+		public void SetWeightConditions(N goal, Algorithm type){
 
 			Goal = goal;
+			Type = type;
 			if(Goal == null)
 				_heuristic = 0;
 			else
 				_heuristic = GetDistance(Goal);
-
-		}
-
-		public void SetType(Algorithm type){
-
-			Type = type;
 
 		}
 
@@ -196,8 +162,21 @@ namespace AStarPathfinding {
 
 		}
 
+		// returns whether two nodes are equal based on their world position
+		public bool Equals(N other){
+
+			return other.GetIndex() == GetIndex();
+
+		}
+
+		public override int GetHashCode(){
+
+			return GetIndex().GetHashCode();
+
+		}
+
 		// returns index of node based on coordinates and world size
-		protected int GetIndex(int[] coordinates, int[] worldSize){
+		protected int GenerateIndex(int[] coordinates, int[] worldSize){
 
 			int rank = worldSize.Length;	// the number of dimensions
 
@@ -239,12 +218,10 @@ namespace AStarPathfinding {
 		}
 		
 		/* ABSTRACT METHODS */
-		public abstract bool Equals(N other);	// checks if this node is equal to node of same type
 		public abstract int GetIndex();	// get world index of this node
 		public abstract float GetTravelCost(N to);	// get cost of traveling to other node of same type
 		public abstract float GetDistance(N to);	// get distance from this node to other node of same type
 		public abstract List<N> GetNeighbors();	// get accessible nodes adjacent to this node
-		public override abstract int GetHashCode();	// get hashcode of node subclass
 
 	}
 

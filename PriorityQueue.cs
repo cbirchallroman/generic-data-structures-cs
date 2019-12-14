@@ -13,6 +13,7 @@ namespace PriorityQueue {
 		private const int DefaultCapacity = 100;
 
 		public int Count { get { return _count; } }
+		public bool IsEmpty { get { return _count == 0; } }
 
 		// by default, the comparer is not used in reverse
 		public PriorityQueue() : this(DefaultCapacity, false) { }
@@ -80,7 +81,7 @@ namespace PriorityQueue {
 		}
 
 		// private function to assist Remove(T element) function
-		private void RemoveAt(int index){
+		private T RemoveAt(int index){
 
 			T element = _elements[index];	//get the topmost element
 			
@@ -89,7 +90,7 @@ namespace PriorityQueue {
 				_elements.RemoveAt(1);
 				_elements.RemoveAt(0);	// also remove the stand-in element
 				_count--;	// there's one less element in the queue
-				return;
+				return element;
 			}
 
 			// otherwise, swap with the bottommost element and downheap from the top
@@ -103,6 +104,8 @@ namespace PriorityQueue {
 				_elements[index] = last;
 				Downheap(index);
 			}
+
+			return element;
 			
 
 		}
@@ -230,6 +233,94 @@ namespace PriorityQueue {
 					return i;
 			
 			return -1;
+
+		}
+
+	}
+
+	public class PriorityQueue<TPriority, TDatum> where TPriority : IComparable<TPriority>{
+		
+		private const int DefaultCapacity = 100;
+
+		private PriorityQueue<PriorityNode<TPriority, TDatum>> _priorityQueue;
+
+		public int Count { get { return _priorityQueue.Count; } }
+		public bool IsEmpty { get { return _priorityQueue.IsEmpty; } }
+
+		public PriorityQueue() : this(DefaultCapacity, false){ }
+		public PriorityQueue(int capacity) : this(capacity, false){ }
+		public PriorityQueue(bool reverse) : this(DefaultCapacity, reverse){ }
+		public PriorityQueue(int capacity, bool reverse){ _priorityQueue = new PriorityQueue<PriorityNode<TPriority, TDatum>>(capacity, reverse); }
+
+		public void Enqueue(TPriority priority, TDatum datum){
+
+			PriorityNode<TPriority, TDatum> entry = new PriorityNode<TPriority, TDatum>(priority, datum);
+			_priorityQueue.Enqueue(entry);
+
+		}
+
+		public TDatum Peek(){
+
+			return _priorityQueue.Peek() != null ? _priorityQueue.Peek().Datum : default(TDatum);
+
+		}
+
+		public TDatum Dequeue(){
+
+			return _priorityQueue.Peek() != null ? _priorityQueue.Dequeue().Datum : default(TDatum);
+
+		}
+
+		public void Remove(TDatum datum){
+
+			PriorityNode<TPriority, TDatum> temp = new PriorityNode<TPriority, TDatum>(default(TPriority), datum);
+			_priorityQueue.Remove(temp);
+
+		}
+
+		public void Update(TPriority priority, TDatum datum){
+
+			PriorityNode<TPriority, TDatum> temp = new PriorityNode<TPriority, TDatum>(priority, datum);
+			_priorityQueue.Update(temp);
+
+		}
+
+	}
+
+	public class PriorityNode<TPriority, TDatum> : IComparable<PriorityNode<TPriority, TDatum>> where TPriority : IComparable<TPriority>{
+
+		public TPriority Priority { get; private set; }
+		public TDatum Datum { get; private set; }
+
+		public PriorityNode(TPriority priority, TDatum datum){
+
+			Priority = priority;
+			Datum = datum;
+
+		}
+
+		public int CompareTo(PriorityNode<TPriority, TDatum> other){
+
+			return other.Priority.CompareTo(Priority);
+
+		}
+
+		public override bool Equals(object obj){
+
+			if(obj.GetType() != GetType())
+				return false;
+
+			PriorityNode<TPriority, TDatum> other = (PriorityNode<TPriority, TDatum>)obj;
+
+			if(other.Datum.GetType() != Datum.GetType())
+				return false;
+			
+			return other.Datum.Equals(Datum);
+		}
+
+		public override int GetHashCode(){
+
+			return Datum.GetHashCode();
 
 		}
 

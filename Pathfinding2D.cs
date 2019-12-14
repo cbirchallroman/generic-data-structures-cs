@@ -4,8 +4,30 @@ using AStarPathfinding;
 
 namespace Pathfinding2D {
 
+	public class Pathfinder2D<W> where W : World<W>{
+
+		private Pathfinder<Node2D<W>> _pathfinder;
+		private Algorithm _type;
+
+		public Pathfinder2D() : this(Algorithm.AStar) { }
+		public Pathfinder2D(Algorithm type){
+			_pathfinder = new Pathfinder<Node2D<W>>();
+			_type = type;
+		}
+
+		public Queue<Node2D<W>> FindPath(Node2D<W> start, Node2D<W> finish, PathConditions<W> conditions){
+
+			start.SetTravelConditions(conditions);
+			finish.SetTravelConditions(conditions);
+
+			return _pathfinder.FindPath(start, finish, _type);
+
+		}
+
+	}
+
 	[System.Serializable]
-	class Node2D<W> : Node<Node2D<W>> where W : World<W> {
+	public class Node2D<W> : Node<Node2D<W>> where W : World<W> {
 
 		public int X { get; private set; }
 		public int Y { get; private set; }
@@ -22,7 +44,7 @@ namespace Pathfinding2D {
 
 		}
 
-		public void SetConditions(PathConditions<W> conditions){
+		public void SetTravelConditions(PathConditions<W> conditions){
 
 			_conditions = conditions;
 
@@ -30,12 +52,12 @@ namespace Pathfinding2D {
 
 		public override string ToString() { return "(" + X + ", " + Y + ")"; }
 
-		// returns world index of node by calculating w/ local matrix coordinates
+		// returns unique index of node with local matrix coordinates
 		public override int GetIndex(){
 
 			//int index = X * (_conditions.SzX - 1) + Y;
-			int index = GetIndex(new int[]{X, Y}, _world.Dimensions);
-			return index;	// row-major order
+			int index = GenerateIndex(new int[]{X, Y}, _world.Dimensions);
+			return index;
 
 		}
 		
@@ -56,7 +78,7 @@ namespace Pathfinding2D {
 			int dy = Math.Abs(Y - to.Y);
 
 			// octile distance if diagonal movement allowed
-			if(_conditions.DiagonalAllowed)
+			if(_conditions?.DiagonalAllowed != null)
 				return (dx + dy) + (SQRT2 - 2) * (Math.Min(dx, dy));
 
 			// manhattan distance: simply add differences along both axes
@@ -85,8 +107,8 @@ namespace Pathfinding2D {
 					// 	THEREFORE, IF YOU WANT TO SEE IF YOU CAN GO FROM TILE A TO TILE B
 					//	YOU NEED TO CALL "_conditions.CanGo(B, A)" INSTEAD
 					if(_conditions.CanGo(neighbor, this)){
+						neighbor.SetTravelConditions(_conditions);
 						neighbor.SetParent(this);
-						neighbor.SetConditions(_conditions);
 						neighbors.Add(neighbor);
 					}
 
@@ -107,13 +129,6 @@ namespace Pathfinding2D {
 
 		}
 
-		// returns true if coordinates are the same
-		public override bool Equals(Node2D<W> other){
-
-			return X == other.X && Y == other.Y;
-
-		}
-
 		public override int GetHashCode(){
 			int hash = 3;
 			hash = hash * 5 + X.GetHashCode();
@@ -124,7 +139,7 @@ namespace Pathfinding2D {
 	}
 
 	[System.Serializable]
-	abstract class World<W> where W : World<W>{
+	public abstract class World<W> where W : World<W>{
 
 		public int SizeX { get; protected set; }
 		public int SizeY { get; protected set; }
@@ -141,7 +156,7 @@ namespace Pathfinding2D {
 	}
 
 	[System.Serializable]
-	abstract class PathConditions<W> where W : World<W> {
+	public abstract class PathConditions<W> where W : World<W> {
 
 		protected W _world;
 		public bool DiagonalAllowed { get; protected set; }
